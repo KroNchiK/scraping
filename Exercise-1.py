@@ -43,7 +43,7 @@ while True:
             vacancy_name = vacancy.find('a')
             vacancy_link = vacancy_name['href']
             salary = vacancy.find('span', {'data-qa': 'vacancy-serp__vacancy-compensation'})
-            if salary is not None:
+            if salary is not None and len(salary.text) > 11:
                 min_salary, max_salary, currency = salary_normalization(salary.text)
             else:
                 min_salary, max_salary, currency = None, None, None
