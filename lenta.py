@@ -3,27 +3,26 @@ from lxml import html
 from pprint import pprint
 import unicodedata
 
-header = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) '
-                       'Chrome/87.0.4280.88 Safari/537.36'}
+url = 'https://lenta.ru'
+header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) '
+                        'Chrome/87.0.4280.88 Safari/537.36'}
 
-# lenta.ru
-lenta_url = 'https://lenta.ru/'
-lenta_xpath = "//div[@class='first-item']/h2/a/text()  | //div[@class='item']/a/text()"
+items_xpath = "//div[@class='span4']/div[@class='first-item'] | //div[@class='span4']/div[@class='item']"
 
-
-
-
-
-response = requests.get(lenta_url, headers=header)
+response = requests.get(url, headers=header)
 dom = html.fromstring(response.text)
 
-row_news = dom.xpath(lenta_xpath)
+raw_items = dom.xpath(items_xpath)
 all_news = []
-for news in row_news:
+for item in raw_items:
     data_news = {}
-    news = unicodedata.normalize('NFKD', news)
-    data_news['news'] = news
+    text = unicodedata.normalize('NFKD', item.xpath("./h2/a/text() | ./a/text()")[0])
+    date = item.xpath(".//time/@title")[0]
+    link = url + item.xpath(".//a/@href")[0]
+    data_news['text'] = text
     data_news['source'] = 'lenta.ru'
+    data_news['date'] = date
+    data_news['link'] = link
     all_news.append(data_news)
 
 pprint(all_news)
