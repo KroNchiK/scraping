@@ -1,6 +1,15 @@
 import requests
 from lxml import html
 from pprint import pprint
+from pymongo import MongoClient
+
+# Функция добавляющая новости в БД
+def update_db(data):
+    client = MongoClient('127.0.0.1', 27017)
+    db = client['news']
+    yandex = db.yandex
+    for item in data:
+        yandex.update_one({'link': item['link']}, {'$set': item}, upsert=True)
 
 url = 'https://yandex.ru/news/'
 header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -23,4 +32,8 @@ for item in raw_items:
     data_news['link'] = link
     data_news['date'] = date
     all_news.append(data_news)
+
+update_db(all_news)
 pprint(all_news)
+
+# В идеале, стоит привести время к единому стандарту для всех источников
